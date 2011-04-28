@@ -33,10 +33,11 @@
 
 Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" target="_blank">weberdevelopment.de</a>
 <p>Just for fun and learning experiences :) and not done yet !</p>
+<p><strong>Instructions:</strong> Use your keyboard arrow keys !</p>
 
 <script type="text/javascript">
 		
-		  var canvas;
+		var canvas;
   		var context;
 
   		var HEIGHT;
@@ -47,22 +48,21 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
   		var level;
   		var bg_cloud;
 
- 		function Player(ctx, canvas) {
+ 		function Player() {
 
 			this.width = 40;			
 			this.height = 54;
 
-			this.ctx = ctx;
-
-			this.posX = 40;//(canvas.width / 2) - (this.width / 2);
-			this.posY = canvas.height - this.height;
+			this.posX = (canvas.width / 2) - (this.width / 2);
+			this.posY = canvas.height - this.height - 60;
 
 			this.img = new Image();
   			this.img.src = "guy.png";
 
  			this.SPEED = 2;
+ 			this.levelSpeed = -1;
 
-			this.jumpHeight = 100;
+			this.jumpHeight = 110;
 			this.halfPI = Math.PI / 2;
 	    	/** The amount of time to spend in the air when jumping */
 		    this.jumpHangTime = 0.5;
@@ -83,7 +83,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
 	        this.dt = 0.02;
 
-          this.blockGround = canvas.height;
+          	this.blockGround = canvas.height;
 
 	        // ------------------------------------------------------
 	        this.draw = function() {
@@ -92,12 +92,16 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 		    	if (this.left) {
               		this.posX -= this.SPEED;
               		this.img.src = "guyLeft.png";
+              		this.levelSpeed = 0;
               	}
            		if (this.right) {
                		this.posX += this.SPEED;
                		this.img.src = "guy.png";
+               		this.levelSpeed = 0;
                	}
 
+               	this.levelSpeed = -1;
+		        
 		        // JUMP
 			  	if (!this.grounded)
 		       	{
@@ -130,13 +134,18 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 	   			
 	   			this.blockGround = canvas.height;
 	   			// DRAW HERO
-	   			this.ctx.drawImage(this.img, this.posX , this.posY);
+	   			if( this.posX > 0) {
+	   				this.posX += this.levelSpeed;
+	   			}
+	   			context.drawImage(this.img, this.posX, this.posY);
+	   			// (image, sx, sy, sw, sh, dx, dy, dw, dh)
+	   			
 	        }
 
 		}
 
 
-		function Block(ctx, canvas, _x) {
+		function Block(_x, _w, _h) {
 			
 			this.random = function( min, max ) {
 				if( min > max ) {
@@ -155,28 +164,24 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 			var blockHeights = [ 20, 60, 100, 140 ];
 			var blockColors = [ "#880000", "#008800", "#000088", "#880088" ];
 			
-      this.color = blockColors[rnd];      
-      this.width = blockWidths[rnd];
-      this.height = blockHeights[rnd];
-
-			this.x = _x;
-
-
-      this.img = new Image();
-      this.img.src = "block300_100.png";
+		    this.color = blockColors[rnd];      
+		    this.width = _w ? _w : blockWidths[rnd];		    
+		    this.height = _h ? _h : blockHeights[rnd];
 			
+			this.x = _x;
 			this.y = canvas.height - this.height;
-			this.ctx = ctx;
+
+			this.img = new Image();
+      		this.img.src = "block300_100.png";
 
 			this.speed = 2;
 
 			this.draw = function(levelSpeed) {
 
-			      this.x -= this.speed + levelSpeed;
-
-				    //this.ctx.fillStyle = this.color;
-            this.ctx.drawImage(this.img, this.x , this.y, this.width, this.height);
-        		//this.ctx.fillRect (this.x, this.y, this.width, this.height);
+				this.x -= this.speed + levelSpeed;
+				//this.ctx.fillStyle = this.color;
+				context.drawImage(this.img, this.x , this.y, this.width, this.height);
+				//this.ctx.fillRect (this.x, this.y, this.width, this.height);
 
         		if(this.x + this.width < 0)
         			this.speed = 0;
@@ -185,27 +190,28 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 		}
 
 
-		function Level(ctx, canvas) {
-			
-			this.ctx = ctx;
-			this.canvas = canvas;
+		function Level() {			
 
 			this.lastBlock = null;
 			this.blocks = new Array;
 
 			this.hero = new Player(context, canvas);
+			
 			this.speed = 0.0001;
-
 			const BLOCK_GAP = 160;
+			const MAX_SPEED = 12;
+
+			// Generate first block:
+			this.blocks.push(new Block(canvas.width / 2, 300, 60));
 
 			this.generateBlock = function() {	
 				
-				var nextX = this.canvas.width;
+				var nextX = canvas.width;
 				if(this.blocks.length > 0) {
 					nextX = this.blocks[this.blocks.length - 1].x + this.blocks[this.blocks.length - 1].width + BLOCK_GAP;
 				}
 
-				this.blocks.push(new Block(this.ctx, this.canvas, nextX));							
+				this.blocks.push(new Block(nextX));							
 			}
 
 			this.draw = function() {
@@ -215,50 +221,58 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 				for(var i = 0; i < this.blocks.length; i++) {					
 
 
-					var blockXRange = this.blocks[i].x + this.blocks[i].width;
+					var blockXRange = this.blocks[i].x + this.blocks[i].width;	     	
 
-			        // DRAW BLOCK
-					//if(blockXRange > 0) {
-
-						
-					//} else {
-					/*	console.log(this.blocks[i].x);
-						this.blocks.splice(i, 1);
-						console.log("deleted" + i);
-					}
-					
-					// Player before a Block
-					if( (this.hero.posX + this.hero.width) < this.blocks[i].x && this.hero.posX > blockXRange ) {
-						this.hero.blockGround = canvas.height;
-						if(this.hero.grounded) {
-							//this.hero.posY = 
-						}
-					}						
-					*/
-					// Player on a Block
-					if((this.hero.posY + this.hero.height) >= this.blocks[i].height && ( this.hero.posX >= this.blocks[i].x && this.hero.posX <= blockXRange) )  {
-						this.hero.blockGround = canvas.height - this.blocks[i].height;						
-			     	}
-
-			     	// GAP
-			     	if( (this.hero.posX + this.hero.width) < this.blocks[i].x && this.hero.posX > blockXRange ) {
-			     		if((this.hero.posY + this.hero.height <= this.blocks[i].y) && (this.hero.posX + this.hero.width) >= this.blocks[i].x) {
-			     			this.hero.posY = canvas.height - this.hero.height;
-			     			this.reset();
-			     		}
-			     	}
-
-			     	// Hits ground
+			     	// Player hits ground
 			        if(this.hero.posY + this.hero.height == canvas.height) {
 			        	this.reset();
 			        }
 
 					// Draw Block
 			     	if(blockXRange > 0) {
-			     		if(this.speed < 5)
+			     		
+			     		if(this.speed < MAX_SPEED)
 			     			this.speed += 0.0001;
 						
 						this.blocks[i].draw(this.speed);
+
+						// Player on a Block
+						/*
+						if((this.hero.posY + this.hero.height) >= this.blocks[i].height && ( this.hero.posX >= this.blocks[i].x && this.hero.posX <= blockXRange) )  {
+							this.hero.blockGround = canvas.height - this.blocks[i].height;						
+			     		} else {
+			     				//this.hero.blockGround = canvas.height;
+			     		} */
+		
+				     		
+			     		// Player between Block
+			     		if( (this.hero.posX >= this.blocks[i].x) && (this.hero.posX + this.hero.width <= this.blocks[i].x + this.blocks[i].width) ) {
+	
+				     		// Player on Block
+		     				this.hero.blockGround = canvas.height - this.blocks[i].height;
+
+			     		}
+		
+						// Player on ground
+		     			if(this.hero.posY + this.hero.height >= canvas.height - 5) {
+		     				this.hero.posY = -100;			     				
+		     				this.reset();
+						}
+
+	
+			     		// Player in Gap
+			     		/*
+			     		if( (this.hero.posX + this.hero.width) < this.blocks[i].x && this.hero.posX > blockXRange ) {
+			     			this.hero.blockGround = canvas.height;
+
+			     			// Player
+			     			if((this.hero.posY + this.hero.height <= this.blocks[i].y) && (this.hero.posX + this.hero.width) >= this.blocks[i].x) {
+			     			this.hero.posY = canvas.height - this.hero.height;
+			     			this.reset();
+			     		} 
+			     	}*/
+
+
 					} else {
 						// Delete if not visible anymore
 						this.blocks.splice(i, 1);
@@ -272,7 +286,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 				counter = document.getElementById("counter");
 				counter.value = 0;
 				this.speed = 0.0001;	
-				this.hero.posY = canvas.height - this.hero.height;				
+				//this.hero.posY = canvas.height - this.hero.height;				
 			}
 
 		}
@@ -317,7 +331,8 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
   					
   			// HERO
   			level.draw();
-  			counter.value = parseInt(counter.value) + 1;
+  			if(level.hero.posY > 0)
+  				counter.value = parseInt(counter.value) + 1;
 
   			context.fillStyle = "#0000FF";
   			context.fillText(counter.value, 5, 15);
@@ -353,7 +368,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 		// --------------------------------------------------
   		$(document).ready(function() {
   			init();
-  			level = new Level(context, canvas);
+  			level = new Level();
   		});
 
   		$(document).keydown(onKeyDown);
