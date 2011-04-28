@@ -36,7 +36,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
 <script type="text/javascript">
 		
-		var canvas;
+		  var canvas;
   		var context;
 
   		var HEIGHT;
@@ -149,27 +149,34 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
        			return( min + parseInt( Math.random() * ( max-min+1 ) ) );
 			}
 			var rnd = this.random(0,4);
+      //var rnd2 = this.random(0,4);
 
 			var blockWidths = [ 100, 150, 200, 300];
 			var blockHeights = [ 20, 60, 100, 140 ];
 			var blockColors = [ "#880000", "#008800", "#000088", "#880088" ];
-					
-			this.color = blockColors[rnd];			
-			this.width = blockWidths[rnd];
-			this.height = blockHeights[rnd];
+			
+      this.color = blockColors[rnd];      
+      this.width = blockWidths[rnd];
+      this.height = blockHeights[rnd];
+
 			this.x = _x;
+
+
+      this.img = new Image();
+      this.img.src = "block300_100.png";
 			
 			this.y = canvas.height - this.height;
 			this.ctx = ctx;
 
 			this.speed = 2;
-			
+
 			this.draw = function(levelSpeed) {
 
-				this.x -= this.speed + levelSpeed;
+			      this.x -= this.speed + levelSpeed;
 
-				this.ctx.fillStyle = this.color;
-        		this.ctx.fillRect (this.x, this.y, this.width, this.height);
+				    //this.ctx.fillStyle = this.color;
+            this.ctx.drawImage(this.img, this.x , this.y, this.width, this.height);
+        		//this.ctx.fillRect (this.x, this.y, this.width, this.height);
 
         		if(this.x + this.width < 0)
         			this.speed = 0;
