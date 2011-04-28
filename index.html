@@ -12,9 +12,7 @@
  	<meta name="viewport" content="width=device-width; initial-scale=1.0">
 
  	<link rel="shortcut icon" href="img/favicon.ico" />
- 	
-	
-	
+ 		
 	<script src="http://www.google.com/jsapi?key=ABQIAAAA-aA-cQ-Dt_eOXMt2cABhzRQvRPGmAZu-tlfdhJELAgtO16tnWxRtu6M5pPKTlkg0fzoFpSutd24Z6A" type="text/javascript"></script>
 	<!--
 	Default: load JQuery from google library 
@@ -83,7 +81,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 	        /** A reference to the level object */
 	        this.level = null;
 
-	        this.dt = 0.01;
+	        this.dt = 0.02;
 
           this.blockGround = canvas.height;
 
@@ -123,8 +121,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 		               		this.jumpSinWavePos = 0;
 		           	}
 		           	// otherwise we are falling
-		           	else if (this.grounded) {
-		           			
+		           	else if (this.grounded) {		           			
 		               		this.grounded = false;
 		               		// starting falling down the sine wave (i.e. from the top)
 		               		this.jumpSinWavePos = this.halfPI;
@@ -305,7 +302,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
   			context.clearRect(0, 0, WIDTH, HEIGHT);  	
   			
   			cloudMoveX -= .1;
-  			if(cloudMoveX == -60) {
+  			if(cloudMoveX <= -600.0) {
   				cloudMoveX = 0;
   			}
   			
@@ -358,7 +355,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 </script>
 
 <input type="hidden" id="counter" value="1" />
-<canvas id="canvas" width="500" height="300">Your browser doesnt know html5 canvas	</canvas>
+<canvas id="canvas" width="600" height="300">Your browser doesnt know html5 canvas	</canvas>
 
 </body>
 </html>
