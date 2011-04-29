@@ -134,9 +134,13 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 	   			
 	   			this.blockGround = canvas.height;
 	   			// DRAW HERO
-	   			if( this.posX > 0) {
+	   			if( this.posX > 0) 
 	   				this.posX += this.levelSpeed;
-	   			}
+	   			if( this.posX < 0)
+	   				this.posX = 1;
+	   			if( this.posX > canvas.width)
+	   				this.posX = canvas.width - this.width;
+
 	   			context.drawImage(this.img, this.posX, this.posY);
 	   			// (image, sx, sy, sw, sh, dx, dy, dw, dh)
 	   			
