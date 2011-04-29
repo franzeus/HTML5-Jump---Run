@@ -82,6 +82,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 	        this.level = null;
 
 	        this.dt = 0.02;
+	        this.fall = true;
 
           	this.blockGround = canvas.height;
 
@@ -140,7 +141,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 	   				this.x = 1;
 	   			if( this.x > canvas.width)
 	   				this.x = canvas.width - this.width;
-
+	   			
 	   			context.drawImage(this.img, this.x, this.y);
 	   			// (image, sx, sy, sw, sh, dx, dy, dw, dh)
 	   			
@@ -200,7 +201,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
 			this.hero = new Player(context, canvas);
 			
-			this.speed = 0.0001;
+			this.speed = 0.00001;
 			const BLOCK_GAP = 160;
 			const MAX_SPEED = 12;
 
@@ -221,41 +222,30 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
         		this.hero.draw();
 
-				for(var i = 0; i < this.blocks.length; i++) {					
-
+				for(var i = 0; i < this.blocks.length; i++) {
 
 					var blockXRange = this.blocks[i].x + this.blocks[i].width;	     	
 
 			     	// Player hits ground
-			        if(this.hero.y + this.hero.height == canvas.height) {
+			        if(this.hero.y + this.hero.height == canvas.height)
 			        	this.reset();
-			        }
 
 					// Draw Block
 			     	if(blockXRange > 0) {
 			     		
 			     		if(this.speed < MAX_SPEED)
-			     			this.speed += 0.0001;
+			     			this.speed += 0.00001;
 						
 						this.blocks[i].draw(this.speed);
 
-						// Player on a Block
-						/*
-						if((this.hero.y + this.hero.height) >= this.blocks[i].height && ( this.hero.x >= this.blocks[i].x && this.hero.x <= blockXRange) )  {
-							this.hero.blockGround = canvas.height - this.blocks[i].height;						
-			     		} else {
-			     				//this.hero.blockGround = canvas.height;
-			     		} */
-		
-				     		
+					     		
 			     		// Player between Block
-			     		if( (this.hero.x >= this.blocks[i].x) && (this.hero.x + this.hero.width <= this.blocks[i].x + this.blocks[i].width) ) {
-	
+						if( this.playerBetweenBlock(this.hero.x, this.hero.width, this.blocks[i].x, this.blocks[i].width) ) {
 				     		// Player on Block
+				     		this.hero.fall = false;
 		     				this.hero.blockGround = canvas.height - this.blocks[i].height;
+			     		}			     		
 
-			     		}
-		
 						// Player on ground
 		     			if(this.hero.y + this.hero.height >= canvas.height - 5) {
 		     				this.hero.y = -100;			     				
@@ -285,11 +275,17 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 			    			
 			}      
 
+			this.playerBetweenBlock = function(heroX, heroW, blockX, blockW) {
+				if((heroX >= blockX) && (heroX + heroW <= blockX + blockW))
+					return true;				
+				else
+					return false;			
+			}
+
 			this.reset = function() {
 				counter = document.getElementById("counter");
 				counter.value = 0;
-				this.speed = 0.0001;	
-				//this.hero.y = canvas.height - this.hero.height;				
+				this.speed = 0.00001;		
 			}
 
 		}
@@ -317,7 +313,11 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
   		// --------------------------------------------------
   		function generate() {
-  			level.generateBlock();  			
+  			level.generateBlock(); 
+
+  			// SCORE
+  			if(level.hero.y > 0)
+  				counter.value = parseInt(counter.value) + 1; 			
   		}
 
   		var cloudMoveX = 0;
@@ -325,21 +325,18 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
   			context.clearRect(0, 0, WIDTH, HEIGHT);  	
   			
+  			// CLOUD
   			cloudMoveX -= .1;
   			if(cloudMoveX <= -600.0) {
   				cloudMoveX = 0;
-  			}
-  			
+  			}  			
   			context.drawImage(bg_cloud, cloudMoveX , 0);
   					
-  			// HERO
-  			level.draw();
-  			if(level.hero.y > 0)
-  				counter.value = parseInt(counter.value) + 1;
+  			// Draw Level
+  			level.draw();  			
 
   			context.fillStyle = "#0000FF";
   			context.fillText(counter.value, 5, 15);
-
   		}
 
   		// --------------------------------------------------
