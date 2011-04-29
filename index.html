@@ -53,8 +53,8 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 			this.width = 40;			
 			this.height = 54;
 
-			this.posX = (canvas.width / 2) - (this.width / 2);
-			this.posY = canvas.height - this.height - 60;
+			this.x = (canvas.width / 2) - (this.width / 2);
+			this.y = canvas.height - this.height - 60;
 
 			this.img = new Image();
   			this.img.src = "guy.png";
@@ -90,12 +90,12 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
 	        	// LEFT & RIGHT
 		    	if (this.left) {
-              		this.posX -= this.SPEED;
+              		this.x -= this.SPEED;
               		this.img.src = "guyLeft.png";
               		this.levelSpeed = 0;
               	}
            		if (this.right) {
-               		this.posX += this.SPEED;
+               		this.x += this.SPEED;
                		this.img.src = "guy.png";
                		this.levelSpeed = 0;
                	}
@@ -113,14 +113,14 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 		            // we have fallen off the bottom of the sine wave, so continue falling
 		            // at a predetermined speed
 		            if (this.jumpSinWavePos >= Math.PI)
-		        		this.posY += this.jumpHeight / this.jumpHangTime * this.fallMultiplyer * this.dt;
+		        		this.y += this.jumpHeight / this.jumpHangTime * this.fallMultiplyer * this.dt;
 		            // otherwise move along the sine wave
 		            else
-		            	this.posY -= (Math.sin(this.jumpSinWavePos) - Math.sin(lastHeight)) * this.jumpHeight;
+		            	this.y -= (Math.sin(this.jumpSinWavePos) - Math.sin(lastHeight)) * this.jumpHeight;
 		           
 			    	    // we have hit the ground
-				        if (this.posY + this.height >= this.blockGround) {
-		               		this.posY = this.blockGround - this.height;
+				        if (this.y + this.height >= this.blockGround) {
+		               		this.y = this.blockGround - this.height;
 		               		this.grounded = true;
 		               		this.jumpSinWavePos = 0;
 		           	}
@@ -134,18 +134,17 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 	   			
 	   			this.blockGround = canvas.height;
 	   			// DRAW HERO
-	   			if( this.posX > 0) 
-	   				this.posX += this.levelSpeed;
-	   			if( this.posX < 0)
-	   				this.posX = 1;
-	   			if( this.posX > canvas.width)
-	   				this.posX = canvas.width - this.width;
+	   			if( this.x > 0) 
+	   				this.x += this.levelSpeed;
+	   			if( this.x < 0)
+	   				this.x = 1;
+	   			if( this.x > canvas.width)
+	   				this.x = canvas.width - this.width;
 
-	   			context.drawImage(this.img, this.posX, this.posY);
+	   			context.drawImage(this.img, this.x, this.y);
 	   			// (image, sx, sy, sw, sh, dx, dy, dw, dh)
 	   			
 	        }
-
 		}
 
 
@@ -162,7 +161,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
        			return( min + parseInt( Math.random() * ( max-min+1 ) ) );
 			}
 			var rnd = this.random(0,4);
-      //var rnd2 = this.random(0,4);
+      		//var rnd2 = this.random(0,4);
 
 			var blockWidths = [ 100, 150, 200, 300];
 			var blockHeights = [ 20, 60, 100, 140 ];
@@ -228,7 +227,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 					var blockXRange = this.blocks[i].x + this.blocks[i].width;	     	
 
 			     	// Player hits ground
-			        if(this.hero.posY + this.hero.height == canvas.height) {
+			        if(this.hero.y + this.hero.height == canvas.height) {
 			        	this.reset();
 			        }
 
@@ -242,7 +241,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
 						// Player on a Block
 						/*
-						if((this.hero.posY + this.hero.height) >= this.blocks[i].height && ( this.hero.posX >= this.blocks[i].x && this.hero.posX <= blockXRange) )  {
+						if((this.hero.y + this.hero.height) >= this.blocks[i].height && ( this.hero.x >= this.blocks[i].x && this.hero.x <= blockXRange) )  {
 							this.hero.blockGround = canvas.height - this.blocks[i].height;						
 			     		} else {
 			     				//this.hero.blockGround = canvas.height;
@@ -250,7 +249,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 		
 				     		
 			     		// Player between Block
-			     		if( (this.hero.posX >= this.blocks[i].x) && (this.hero.posX + this.hero.width <= this.blocks[i].x + this.blocks[i].width) ) {
+			     		if( (this.hero.x >= this.blocks[i].x) && (this.hero.x + this.hero.width <= this.blocks[i].x + this.blocks[i].width) ) {
 	
 				     		// Player on Block
 		     				this.hero.blockGround = canvas.height - this.blocks[i].height;
@@ -258,20 +257,20 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 			     		}
 		
 						// Player on ground
-		     			if(this.hero.posY + this.hero.height >= canvas.height - 5) {
-		     				this.hero.posY = -100;			     				
+		     			if(this.hero.y + this.hero.height >= canvas.height - 5) {
+		     				this.hero.y = -100;			     				
 		     				this.reset();
 						}
 
 	
 			     		// Player in Gap
 			     		/*
-			     		if( (this.hero.posX + this.hero.width) < this.blocks[i].x && this.hero.posX > blockXRange ) {
+			     		if( (this.hero.x + this.hero.width) < this.blocks[i].x && this.hero.x > blockXRange ) {
 			     			this.hero.blockGround = canvas.height;
 
 			     			// Player
-			     			if((this.hero.posY + this.hero.height <= this.blocks[i].y) && (this.hero.posX + this.hero.width) >= this.blocks[i].x) {
-			     			this.hero.posY = canvas.height - this.hero.height;
+			     			if((this.hero.y + this.hero.height <= this.blocks[i].y) && (this.hero.x + this.hero.width) >= this.blocks[i].x) {
+			     			this.hero.y = canvas.height - this.hero.height;
 			     			this.reset();
 			     		} 
 			     	}*/
@@ -290,7 +289,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 				counter = document.getElementById("counter");
 				counter.value = 0;
 				this.speed = 0.0001;	
-				//this.hero.posY = canvas.height - this.hero.height;				
+				//this.hero.y = canvas.height - this.hero.height;				
 			}
 
 		}
@@ -335,7 +334,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
   					
   			// HERO
   			level.draw();
-  			if(level.hero.posY > 0)
+  			if(level.hero.y > 0)
   				counter.value = parseInt(counter.value) + 1;
 
   			context.fillStyle = "#0000FF";
