@@ -25,7 +25,8 @@
 
 	<style>
 		body { color:#FFFFFF; background:#666666; }
-		canvas { background:#FFFFFF; margin-left:20%; margin-top:10%; }
+		canvas { background:#FFFFFF; margin-left:20%; }
+		.counter { background:none; color:#0000FF; font-size:1.4em; border:0;}
 	</style>
 
 </head>
@@ -47,6 +48,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
   		var hero;
   		var level;
   		var bg_cloud;
+  		var skyscraper;
 
  		function Player() {
 
@@ -60,7 +62,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
   			this.img.src = "guy.png";
 
  			this.SPEED = 2;
- 			this.levelSpeed = -1;
+ 			this.levelSpeed = -2;
 
 			this.jumpHeight = 110;
 			this.halfPI = Math.PI / 2;
@@ -134,6 +136,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
            		}
 	   			
 	   			this.blockGround = canvas.height;
+	   			
 	   			// DRAW HERO
 	   			if( this.x > 0) 
 	   				this.x += this.levelSpeed;
@@ -204,24 +207,26 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 			this.speed = 0.00001;
 			const BLOCK_GAP = 160;
 			const MAX_SPEED = 12;
+			const ACCELERATION = 0.0001;
 
 			// Generate first block:
 			this.blocks.push(new Block(canvas.width / 2, 300, 60));
 
 			this.generateBlock = function() {	
 				
-				var nextX = canvas.width;
-				if(this.blocks.length > 0) {
-					nextX = this.blocks[this.blocks.length - 1].x + this.blocks[this.blocks.length - 1].width + BLOCK_GAP;
+				if(this.blocks.length < 15) {
+					var nextX = canvas.width;
+					if(this.blocks.length > 0) {
+						nextX = this.blocks[this.blocks.length - 1].x + this.blocks[this.blocks.length - 1].width + BLOCK_GAP;
+					}
+					this.blocks.push(new Block(nextX));					
 				}
-
-				this.blocks.push(new Block(nextX));							
 			}
 
 			this.draw = function() {
 
+        		
         		this.hero.draw();
-
 				for(var i = 0; i < this.blocks.length; i++) {
 
 					var blockXRange = this.blocks[i].x + this.blocks[i].width;	     	
@@ -234,8 +239,11 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 			     	if(blockXRange > 0) {
 			     		
 			     		if(this.speed < MAX_SPEED)
-			     			this.speed += 0.00001;
+			     			this.speed += ACCELERATION;
 						
+						this.hero.levelSpeed = this.speed;
+
+						// TODO: Only Draw blocks which are visible
 						this.blocks[i].draw(this.speed);
 
 					     		
@@ -244,7 +252,23 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 				     		// Player on Block
 				     		this.hero.fall = false;
 		     				this.hero.blockGround = canvas.height - this.blocks[i].height;
-			     		}			     		
+			     		} else {
+			     			
+			     		}			     	
+			     		// Player in front of block
+			     		/*if(this.playerToWall(this.blocks[i].x, this.blocks[i].y) )	{
+			     			this.hero.x = this.block[i].x - this.hero.width;
+			     			//this.hero.blockGround = canvas.height;
+			     		}*/
+			     		var nextBlock = this.nextBlock();
+			     		if(nextBlock != null) {
+			     			if(this.playerToWall(nextBlock.x, nextBlock.y)) {
+			     				this.hero.x = nextBlock.x - this.hero.width;
+			     				nextBlock.img.src = "blockNext.png";
+			     				console.log("NEXT:" + nextBlock.x);
+			     			}
+			     		}
+
 
 						// Player on ground
 		     			if(this.hero.y + this.hero.height >= canvas.height - 5) {
@@ -254,6 +278,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
 	
 			     		// Player in Gap
+			     		// TODO: GET NEXT BLOCK
 			     		/*
 			     		if( (this.hero.x + this.hero.width) < this.blocks[i].x && this.hero.x > blockXRange ) {
 			     			this.hero.blockGround = canvas.height;
@@ -263,16 +288,13 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 			     			this.hero.y = canvas.height - this.hero.height;
 			     			this.reset();
 			     		} 
-			     	}*/
-
-
+			     		}*/
 					} else {
 						// Delete if not visible anymore
 						this.blocks.splice(i, 1);
 					}
 					
-			     }
-			    			
+			     }			    			
 			}      
 
 			this.playerBetweenBlock = function(heroX, heroW, blockX, blockW) {
@@ -280,6 +302,42 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 					return true;				
 				else
 					return false;			
+			}
+
+			this.playerToWall = function(blockX, blockY) {
+				if(this.hero.x + this.hero.width >= blockX && this.hero.y >= blockY)
+					return true;
+				else
+					return false;
+			}
+
+			this.nextBlock = function() {
+				var nextBlocks = new Array();
+
+				for(var i = 0; i < this.blocks.length; i++) {
+					// GET ALL BLOCKS WHICH ARE COMING
+					if( (this.hero.x + this.hero.width) < this.blocks[i].x) {						
+						nextBlocks.push(this.blocks[i]);
+
+					}
+				}
+
+				var min = canvas.width; 
+				//console.log(nextBlocks.length);
+				if(nextBlocks.length > 0) {
+					min = nextBlocks[0].x;
+					var nextBlock = null;
+
+					// Get smallest x
+					for(var i = 0; i < nextBlocks.length; i++) {
+						if(nextBlocks[i].x < min) {
+							min = nextBlocks[i].x;
+							nextBlock = nextBlocks[i];
+						}
+					}
+
+					return nextBlock;
+				}
 			}
 
 			this.reset = function() {
@@ -304,9 +362,12 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
   			WIDTH = canvas.width;		
 
   			bg_cloud = new Image();
-  			bg_cloud.src = "bg_cloud.png";
+  			bg_cloud.src = "clouds.png";
 
-  			setInterval(draw, 10);
+  			skyscraper = new Image();
+  			skyscraper.src = "skyscraper.png"
+
+  			setInterval(draw, 15);
   			setInterval(generate, 500);
   		}
 
@@ -321,22 +382,37 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
   		}
 
   		var cloudMoveX = 0;
+  		var skyScraperMoveX = 400;
   		function draw() {
 
-  			context.clearRect(0, 0, WIDTH, HEIGHT);  	
+  			context.clearRect(0, 0, WIDTH, HEIGHT); 	
   			
-  			// CLOUD
+  			// Background
+  			var gradient1 = context.createLinearGradient(0, 0, 0, 300);
+  			gradient1.addColorStop(0,   '#c3d8ee');
+			gradient1.addColorStop(1,   '#fff');
+			context.fillStyle = gradient1;
+			context.fillRect(0, 0, 600, 300);
+
+  			// Clouds
   			cloudMoveX -= .1;
-  			if(cloudMoveX <= -600.0) {
-  				cloudMoveX = 0;
+  			if(cloudMoveX <= -900.0) {
+  				cloudMoveX = canvas.width;  				
   			}  			
   			context.drawImage(bg_cloud, cloudMoveX , 0);
+
+  			// Skyscraper
+  			skyScraperMoveX -= .9;
+  			if(skyScraperMoveX <= -1200.0) {
+  				skyScraperMoveX = canvas.width;
+  			}
+  			context.drawImage(skyscraper, skyScraperMoveX , 0);
   					
   			// Draw Level
   			level.draw();  			
 
-  			context.fillStyle = "#0000FF";
-  			context.fillText(counter.value, 5, 15);
+  			//context.fillStyle = "#0000FF";
+  			//context.fillText(counter.value, 5, 15);
   		}
 
   		// --------------------------------------------------
@@ -376,7 +452,7 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
 </script>
 
-<input type="hidden" id="counter" value="1" />
+<div style="width:600px;margin-left:20%;">Score: <input size="4" type="text" id="counter" value="1" class="counter" readonly="readonly" /></div>
 <canvas id="canvas" width="600" height="300">Your browser doesnt know html5 canvas	</canvas>
 
 </body>
