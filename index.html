@@ -165,10 +165,10 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
        			return( min + parseInt( Math.random() * ( max-min+1 ) ) );
 			}
 			var rnd = this.random(0,4);
-      		//var rnd2 = this.random(0,4);
+      //var rnd2 = this.random(0,4);
 
 			var blockWidths = [ 100, 150, 200, 300];
-			var blockHeights = [ 20, 60, 100, 140 ];
+			var blockHeights = [ 40, 80, 100, 140 ];
 			var blockColors = [ "#880000", "#008800", "#000088", "#880088" ];
 			
 		    this.color = blockColors[rnd];      
@@ -249,11 +249,9 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 					     		
 			     		// Player between Block
 						if( this.playerBetweenBlock(this.hero.x, this.hero.width, this.blocks[i].x, this.blocks[i].width) ) {
-				     		// Player on Block
-				     		this.hero.fall = false;
-		     				this.hero.blockGround = canvas.height - this.blocks[i].height;
-			     		} else {
-			     			
+		
+                this.hero.fall = false;
+                this.hero.blockGround = canvas.height - this.blocks[i].height; 
 			     		}			     	
 			     		// Player in front of block
 			     		/*if(this.playerToWall(this.blocks[i].x, this.blocks[i].y) )	{
