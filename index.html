@@ -29,6 +29,8 @@
 		canvas { background:#FFFFFF; margin-left:18%; }
 		.counter { background:none; color:#333333; font-size:1.6em; border:0; font-family: 'Limelight', arial, serif;}
 		#fps { background:#FFFFFF; color:#333333; border:0; color:#008800; }
+		.button { margin-right:1em; cursor:pointer;}
+		#scoreList { padding-top:0.5em;}
 	</style>
 
 </head>
@@ -80,6 +82,20 @@
 		var flash;
 		var showFlash = false;
 		var aktiv;
+
+		// ------------------------------------------------------
+		window.requestAnimFrame = (function() { 
+
+			return window.requestAnimationFrame ||
+					window.webkitRequestAnimationFrame ||
+					window.mozRequestAnimationFrame ||
+					window.oRequestAnimationFrame ||
+					window.msRequestAnimationFrame ||
+					function(callback, element) {
+						window.setTimeout(callback, 1000/ 60);
+					};
+		})();
+
 		// ------------------------------------------------------
 		function Level() {
 			
@@ -599,10 +615,7 @@
 			}
 			
 			that.reset = function() {
-
-				var newScore = that.score + '<br />';
-				$("#scoreList").append(newScore);
-
+				$("#lastScore").html(that.score);
 				that.score = 0;	
 				counter.value = 0;			
 			}
@@ -640,7 +653,7 @@
   			bg_cloud.src = "images/clouds.png";
 
   			moon = new Image();
-  			moon.src = "images/moon2.png";
+  			moon.src = "images/moon.png";
 
   			flash = new Image();
 	  		flash.src = "images/flash.png";
@@ -754,9 +767,9 @@
 				_canvasContext.drawImage(flash, 120, 0);
 
 			// Clouds			
-  		clouds.forEach(function(cloud) {
+  			clouds.forEach(function(cloud) {
 				cloud.draw();
-			});	
+			});
 
   			// Skyscrapers
 			skyscrapers.forEach(function(skyscraper) {
@@ -808,6 +821,9 @@
   				case 38:
   						hero.jump();
   						break;
+  				case 32:
+  						hero.jump();
+  						break;
   				case 88:
   					startSlowMotion();
   					break;
@@ -822,6 +838,19 @@
 		// --------------------------------------------------
   		$(document).ready(function() {  			
   			init();
+  			$("#info").hide();
+
+
+			$(".button").mouseover(function() { 
+				$(this).fadeTo("slow", 0.6);				
+			}).mouseout(function(){
+    			$(this).fadeTo("slow", 1);
+  			});
+
+  			$("#infoButton").click(function() {
+  				$("#info").slideToggle('slow'); //.show();
+  			});
+
   		});
 
   		$(document).keydown(onKeyDown);
@@ -834,7 +863,17 @@
 
 <h1>runnersHigh Html5 (0.7)</h1>
 <div style="width:800px;margin:auto;">
-	<input size="4" type="text" id="fps" /> fps
+	<div style="float:left;">
+		<input size="4" type="text" id="fps" /> fps
+		<br />Last score: <span id="lastScore">0</span>
+	</div>
+
+	<div style="float:right;">
+		<div style="text-align:center">
+			<img src="info.png" id="infoButton" alt="Info" class="button" title="Info"/>
+			<a href="https://github.com/webarbeit/HTML5-Jump---Run" target="_blank"><img src="code.png" id="codeButton" alt="Code" class="button" title="Code @ Github"/></a>
+		</div>
+	</div>
 </div>
 
 <canvas id="canvas" width="800" height="480">Your browser doesnt know html5 canvas</canvas>
@@ -847,17 +886,19 @@
 
 <!-- <audio src="hersey.mp3" preload="auto" autobuffer autoplay></audio> -->
 
-<div id="scoreList">
-</div>
 
-<p>
-This is a simple Jump&amp;Run game which I made just for fun and learning experiences.
-It is absolutely not finished yet!
-<br />
-The best performance was achieved in Firefox > 4
-</p>
-<p><strong>Instructions:</strong> Use your keyboard arrow up-key or left mouse button to jump!</p>
-<p>Made by <a href="http://www.weberdevelopment.de" target="_blank">weberdevelopment.de</a> in June 2011</p>
+
+<div id="info">
+	<p>
+	DESCRIPTION:<br />
+	This is a simple Jump&amp;Run game which I made just for fun and learning experiences.
+	It is absolutely not finished yet!
+	<br />
+	The best performance was achieved in Firefox > 4
+	</p>
+	<p><strong>INSTRUCTIONS:</strong><br /> Use your keyboard arrow up-key, space bar or left mouse button to jump!</p>
+	<p>Made by <a href="http://www.weberdevelopment.de" target="_blank">weberdevelopment.de</a> in June 2011</p>
+</div>
 <!--
 Todo:
 <ul>
