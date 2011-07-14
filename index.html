@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head> 
-	<title></title>
+	<title>runnersHigh Html5 Version</title>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 	<meta http-equiv="language" content="de" />
-	<meta name="author" content="" />
+	<meta name="author" content="weberdevelopment.de" />
 	<meta name="robots" content="index, follow" />
-	<meta name="keywords" content="" />
-    <meta name="description" content="" />
+	<meta name="keywords" content="html5,2d,jump,run,game" />
+  <meta name="description" content="Simple jump and run game in HTML5 canvas" />
 
  	<meta name="viewport" content="width=device-width; initial-scale=1.0">
 
@@ -20,21 +20,19 @@
     -->
     <script type="text/javascript">
   		google.load("jquery", "1");
-  		google.load("jqueryui", "1");
 	</script>
 
+	<link href='http://fonts.googleapis.com/css?family=Limelight&v1' rel='stylesheet' type='text/css'>
 	<style>
-		body { color:#FFFFFF; background:#666666; }
-		canvas { background:#FFFFFF; margin-left:20%; }
-		.counter { background:none; color:#0000FF; font-size:1.4em; border:0;}
+		h1 { font-family: 'Limelight', arial, serif; font-size:3em; text-align:center; }
+		body { color:#FFFFFF; background:#666666; font-family: 'Limelight', arial;}
+		canvas { background:#FFFFFF; margin-left:18%; }
+		.counter { background:none; color:#333333; font-size:1.6em; border:0; font-family: 'Limelight', arial, serif;}
+		#fps { background:#FFFFFF; color:#333333; border:0; color:#008800; }
 	</style>
 
 </head>
 <body id="body">
-
-Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" target="_blank">weberdevelopment.de</a>
-<p>Just for fun and learning experiences :) and not done yet !</p>
-<p><strong>Instructions:</strong> Use your keyboard arrow keys !</p>
 
 <script type="text/javascript">
 		
@@ -43,415 +41,856 @@ Html5 / Javascript Jump&amp;Run game. <a href="http://www.weberdevelopment.de" t
 
   		var HEIGHT;
   		var WIDTH;
-
-  		var counter;
+  	 		
   		var hero;
   		var level;
-  		var bg_cloud;
-  		var skyscraper;
 
+  		var moon;
+  		var bg_cloud;
+  		var gradient1;
+
+  		var spriteSpeed = 100;
+
+		var score, counter;
+
+  		var buffer;
+		var _canvasContext = null;
+
+		var clearAfteObject = false;
+
+		const START_SPEED = 7;
+		const BLOCK_GAP = 150;
+		const ACCELERATION = 0.001;
+		var SPEED_EFFECT = 0;
+		var LEVEL_SPEED;
+
+		var platforms = [];
+		var bonis = [];
+		var skyscrapers = [];
+		var clouds = [];
+		var enemies = [];
+
+		var blockWidths = [ 100, 150, 200, 250];
+		var blockHeights = [ 60, 90, 120, 150];
+
+		var buildingWidths = [ 60, 80, 100, 150, 200];
+		var buildingHeights = [ 120, 150, 180, 210, 250];
+		var alphaValues = [ 0.2, 0.3 , 0.4, 0.5 , 0.6 , 0.7, 0,8];		
+
+		var flash;
+		var showFlash = false;
+		var aktiv;
+		// ------------------------------------------------------
+		function Level() {
+			
+			var that = this;
+
+			that.aktiv;
+			
+			that.update = function() {	
+				if(SPEED_EFFECT > 0)
+					SPEED_EFFECT -= 0.5;
+
+				LEVEL_SPEED += ACCELERATION - SPEED_EFFECT;
+
+				that.checkPlatformsPosition();
+				that.checkBuildingsPosition();
+				that.checkCloudsPosition();
+			};
+
+			that.checkPlatformsPosition = function() {		
+				for(var i = 0; i < platforms.length; i++) {
+					if(platforms[i].x + platforms[i].width < 0) {						
+						platforms[i].x = that.getPreviousBlockXPosition(i);
+						
+						platforms[i].width = blockWidths[randomNumber(0, blockWidths.length -1)];
+						platforms[i].height = blockHeights[randomNumber(0, blockHeights.length - 1)];
+						platforms[i].y = HEIGHT - platforms[i].height;
+						platforms[i].addSpecialFigure();
+
+						// New Bonus Position
+						bonis[i].y = platforms[i].y - randomNumber(15,30);
+						bonis[i].x = platforms[i].x + randomNumber(0, platforms[i].width);
+						if(randomNumber(1,10) > 9)
+							bonis[i].visible = true;
+						else
+							bonis[i].visible = false;
+
+						// New Enemy Position
+						var enemyPosY = [ enemies[i].height, platforms[i].height + enemies[i].height];
+						enemies[i].y = HEIGHT - enemyPosY[randomNumber(0, 1)];
+						enemies[i].x = randomNumber(platforms[i].x, platforms[i].x + platforms[i].width);
+						if(randomNumber(1,10) > 4)
+							enemies[i].visible = true;
+						else
+							enemies[i].visible = false;
+					}
+				}
+			};
+
+			that.showGimmick = function() {
+				if(randomNumber(0,100) < 2) {
+					showFlash = true;
+					aktiv = window.setTimeout("hideGimmick()", 1000);
+				}
+			};
+
+			that.checkCloudsPosition = function() {
+
+				for(var i = 0; i < clouds.length; i++) {
+					if(clouds[i].x + 50 < 0) {						
+						clouds[i].x = WIDTH + buildingWidths[randomNumber(0, buildingWidths.length - 1)];
+						clouds[i].y = buildingWidths[randomNumber(0, buildingWidths.length - 2)];
+					}
+				}
+			};
+
+			that.checkBuildingsPosition = function() {				
+				for(var i = 0; i < skyscrapers.length; i++) {
+					if(skyscrapers[i].x + skyscrapers[i].width < 0) {						
+						skyscrapers[i].x = that.getPreviousBuildingXPosition(i);
+						
+						skyscrapers[i].width = buildingWidths[randomNumber(0, buildingWidths.length -1)];
+						skyscrapers[i].height = buildingHeights[randomNumber(0, buildingHeights.length -1)];
+						skyscrapers[i].y = HEIGHT - skyscrapers[i].height;
+
+						if(randomNumber(1,10) > 9)
+							skyscrapers[i].antenne = true;
+						else
+							skyscrapers[i].antenne = false;
+					}
+				}
+			};
+
+			that.getPreviousBlockXPosition = function(index) {
+				var newXpos = 0;
+
+				if(index == 0)
+					index = platforms.length - 1;
+				else
+					index = index - 1;
+
+				return platforms[index].x + platforms[index].width + BLOCK_GAP;
+			};
+
+			that.getPreviousBuildingXPosition = function(index) {
+				var newXpos = 0;
+				var gap = 60;
+
+				if(index == 0) {
+					index = skyscrapers.length - 1;
+					gap = 900;
+				} else {
+					index = index - 1;					
+				}
+
+				return skyscrapers[index].x + skyscrapers[index].width + gap;
+			};
+
+			that.generateBlocks = function(nrOfBlocks) {
+				var nextX = WIDTH;
+
+				var type;
+				for (var i = 0; i < nrOfBlocks; i++) {
+					
+					if(i > 0)
+						nextX = platforms[platforms.length - 1].x + platforms[platforms.length - 1].width + BLOCK_GAP;
+					else
+						nextX = WIDTH / 2 - 20;
+
+					var rand = blockWidths[randomNumber(0, blockWidths.length -1)];
+					var blockWidth = blockWidths[randomNumber(0, blockWidths.length -1)];
+					var blockHeight = blockHeights[randomNumber(0, blockHeights.length - 1)];
+					platforms[i] = new Platform(nextX, blockWidth, blockHeight);
+					bonis[i] = new Bonus(nextX + (blockWidth / 2),  HEIGHT - blockHeight - 15);
+					that.generateEnemy(nextX, platforms[i].y, blockWidth, blockHeight);
+				}
+			};
+
+			that.generateBuildings = function(nr) {
+				for (var i = 0; i < nr; i++) {					
+					if(i > 0)
+						nextX = skyscrapers[skyscrapers.length - 1].x + skyscrapers[skyscrapers.length - 1].width + 60;
+					else
+						nextX = WIDTH - 100;
+
+					skyscrapers[i] = new Skyscraper(nextX);					
+				}
+			};
+
+			that.generateClouds = function(nr) {
+				for (var i = 0; i < nr; i++) {
+					
+					if(i > 0)
+						nextX = clouds[clouds.length - 1].x + buildingWidths[randomNumber(0, buildingWidths.length - 1)];
+					else
+						nextX = WIDTH - 200;
+
+					y = buildingWidths[randomNumber(0, buildingWidths.length - 2)];
+
+					clouds[i] = new Cloud(nextX, y);					
+				}
+			};
+
+			that.generateEnemy = function(_x, _y, _w, _h) {
+				enemies.push(new Enemy(_x, _y, _w, _h));
+			};
+
+			that.reset = function() {
+				LEVEL_SPEED = START_SPEED;
+				score.reset();
+				platforms = [];
+				enemies = [];
+				clouds = [];
+				skyscrapers = [];
+
+				that.generateBuildings(6);
+				that.generateClouds(5);
+				that.generateBlocks(5);
+			};
+		};		
+
+		// ------------------------------------------------------
+		var showGimmick = function() {
+			var rnd = randomNumber(0,100);
+			showFlash = false;
+			if(rnd < 10) {
+				showFlash = true;			
+			}
+			aktiv = setTimeout("showGimmick()", 1000);
+		};
+
+		var startSlowMotion = function() {
+					SPEED_EFFECT = 1;
+					console.log("slowmotion");
+					aktiv = setTimeout("stopSlowMotion()", 1000);	
+		};
+
+		var stopSlowMotion = function() {					
+					SPEED_EFFECT = 0;
+					clearTimeout(aktiv);
+		};
+
+		// ------------------------------------------------------
  		function Player() {
 
-			this.width = 40;			
-			this.height = 54;
+ 			var that = this;
 
-			this.x = (canvas.width / 2) - (this.width / 2);
-			this.y = canvas.height - this.height - 60;
+			this.width = 25;			
+			this.height = 31;
+
+			this.x = 0;
+			this.y = 0;
 
 			this.img = new Image();
-  			this.img.src = "guy.png";
+  			this.img.src = "images/lineman.png";
 
- 			this.SPEED = 2;
- 			this.levelSpeed = -2;
+  			that.grounded = true;
 
-			this.jumpHeight = 110;
-			this.halfPI = Math.PI / 2;
-	    	/** The amount of time to spend in the air when jumping */
-		    this.jumpHangTime = 0.5;
-	        /** The speed to progress alone the sine wave that defines the jumping arc */
-	        this.jumpSinWaveSpeed = this.halfPI / this.jumpHangTime;
-	        /** The current position on the sine wave that defines the jump arc */
-	        this.jumpSinWavePos = 0;
-	        /** The rate to fall at */
-	        this.fallMultiplyer = 1.5;
-	        /** True when the player is on the ground, false otherwise */
-	        this.grounded = true;
-	        /** True if the player is moving left, false otherwise */
-	        this.left = false;
-	        /** True if the player is moving right, false otherwise */
-	        this.right = false;
-	        /** A reference to the level object */
-	        this.level = null;
+  			// *** JUMP *** //
+			// new attributes
+			that.isJumping = false;
+			that.isFalling = false;
+			// state of the object described by bool variables - is it rising or falling?  
+			  
+			that.jumpSpeed = 0;
+			that.fallSpeed = 0;
+			// each - jumping & falling should have its speed values
 
-	        this.dt = 0.02;
-	        this.fall = true;
+          	// *** PLAYER SPRITE *** //
+          	//number of frames indexed from zero  
+          	that.frames = 5;  
+			//start from which frame
+    		that.actualFrame = 0;			
+    		that.interval = 0;
 
-          	this.blockGround = canvas.height;
+    		// Set Position
+    		that.setPosition = function(x, y){  
+			    that.x = x;  
+    			that.y = y;
+			}  
 
 	        // ------------------------------------------------------
 	        this.draw = function() {
+	        	if(clearAfteObject)
+							_canvasContext.clearRect(that.x-1, that.y, 1, that.height);
 
-	        	// LEFT & RIGHT
-		    	if (this.left) {
-              		this.x -= this.SPEED;
-              		this.img.src = "guyLeft.png";
-              		this.levelSpeed = 0;
-              	}
-           		if (this.right) {
-               		this.x += this.SPEED;
-               		this.img.src = "guy.png";
-               		this.levelSpeed = 0;
-               	}
+						if(that.y > HEIGHT - that.height)
+							that.y = HEIGHT - that.height - 2;
 
-               	this.levelSpeed = -1;
-		        
-		        // JUMP
-			  	if (!this.grounded)
-		       	{
-		            // the last position on the sine wave
-		            var lastHeight = this.jumpSinWavePos;
-		            // the new position on the sine wave
-		            this.jumpSinWavePos += this.jumpSinWaveSpeed * this.dt;
-		               
-		            // we have fallen off the bottom of the sine wave, so continue falling
-		            // at a predetermined speed
-		            if (this.jumpSinWavePos >= Math.PI)
-		        		this.y += this.jumpHeight / this.jumpHangTime * this.fallMultiplyer * this.dt;
-		            // otherwise move along the sine wave
-		            else
-		            	this.y -= (Math.sin(this.jumpSinWavePos) - Math.sin(lastHeight)) * this.jumpHeight;
-		           
-			    	    // we have hit the ground
-				        if (this.y + this.height >= this.blockGround) {
-		               		this.y = this.blockGround - this.height;
-		               		this.grounded = true;
-		               		this.jumpSinWavePos = 0;
-		           	}
-		           	// otherwise we are falling
-		           	else if (this.grounded) {		           			
-		               		this.grounded = false;
-		               		// starting falling down the sine wave (i.e. from the top)
-		               		this.jumpSinWavePos = this.halfPI;
-		           	}
-           		}
+           	// PlayerSprite
+	   				if (that.interval == 4 ) {  
+            		if (that.actualFrame == that.frames) {  
+                		that.actualFrame = 0;  
+            		} else {  
+                		that.actualFrame++;  
+            		}  
+            		that.interval = 0;  
+        		}  
+    				that.interval++;
 	   			
-	   			this.blockGround = canvas.height;
-	   			
-	   			// DRAW HERO
-	   			if( this.x > 0) 
-	   				this.x += this.levelSpeed;
-	   			if( this.x < 0)
-	   				this.x = 1;
-	   			if( this.x > canvas.width)
-	   				this.x = canvas.width - this.width;
-	   			
-	   			context.drawImage(this.img, this.x, this.y);
-	   			// (image, sx, sy, sw, sh, dx, dy, dw, dh)
-	   			
+	   				try {
+	   				_canvasContext.drawImage(this.img, that.width * that.actualFrame ,0 ,that.width, that.height, this.x, this.y, that.width, that.height);
+	   				} catch(e) {};
 	        }
+
+	         // ------------------------------------------------------
+	        that.jump = function() {  
+				//initiation of the jump  
+				if (!that.isJumping && !that.isFalling) {  
+				//if objects isn't currently jumping or falling (preventing of 'double jumps', or bouncing from the air  
+				that.fallSpeed = 0;
+				that.isJumping = true;
+				that.jumpSpeed = 18;  
+				that.grounded = false;
+				// initial velocity  
+				}
+			}
+
+			// ------------------------------------------------------
+			that.checkJump = function() {  
+				//when 'jumping' action was initiated by jump() method, initiative is taken by this one.  
+				that.setPosition(that.x, that.y - that.jumpSpeed);  
+				//move object by number of pixels equal to current value of 'jumpSpeed'  
+				that.jumpSpeed--;  
+				//and decease it (simulation of gravity)  
+				if (that.jumpSpeed == 0) {  
+					//start to falling, similar to jump() function  
+					that.isJumping = false;  
+					that.isFalling = true;  
+					that.fallSpeed = 1;  
+				}  
+				  
+			}  
+
+			// ------------------------------------------------------
+			that.checkFall = function(){  
+				//same situation as in checkJump()  
+				if (that.y < HEIGHT - that.height) {  
+					//check if the object meets the bottom of the screen, if not just change the position and increase fallSpeed (simulation of gravity acceleration)...  
+					that.setPosition(that.x, that.y + that.fallSpeed);  
+					that.fallSpeed++;
+				} else {
+					that.fallStop();  
+				}
+				that.isFalling = false;
+			}  
+
+			// ------------------------------------------------------
+			that.fallStop = function(){  
+				//stop falling
+				that.isFalling = false;
+				that.fallSpeed = 0;
+				hero.grounded = true;					
+			}  
 		}
 
-
-		function Block(_x, _w, _h) {
-			
-			this.random = function( min, max ) {
-				if( min > max ) {
-					return( -1 );
-				}
-				if( min == max ) {
-					return( min );
-				}
+		// ------------------------------------------------------
+		function randomNumber( min, max ) {
+			if( min > max )
+				return( -1 );
+			if( min == max )
+				return( min );
  
-       			return( min + parseInt( Math.random() * ( max-min+1 ) ) );
-			}
-			var rnd = this.random(0,4);
-      //var rnd2 = this.random(0,4);
+       		return( min + parseInt( Math.random() * ( max-min+1 ) ) );
+		}
 
-			var blockWidths = [ 100, 150, 200, 300];
-			var blockHeights = [ 40, 80, 100, 140 ];
-			var blockColors = [ "#880000", "#008800", "#000088", "#880088" ];
+		// ------------------------------------------------------
+		var Platform = function(x, _w, _h) {
+			var that = this;
+
+			that.onCollide = function(){
+				hero.fallStop();
+				//hero.y = this.y - hero.height;	
+			};
+
+			that.notOnCollide = function() {
+				if ((hero.x > that.x + that.width) || (hero.x + hero.width < that.x)) {
+					hero.isFalling = true;					
+				}								
+			};
+
+			this.width = _w;
+			this.height = _h;
+			this.x = ~~ x;
+			this.y = HEIGHT - that.height;
+
+      		that.specialFigur = null;
+
+      		//that.img = new Image();
+      		//that.img.src = "tree.png"; 
+      		
+			that.draw = function() {
+				that.x -= LEVEL_SPEED;
+				
+				if(clearAfteObject)
+					_canvasContext.clearRect(that.x-1, that.y, 1, that.height);
+
+				_canvasContext.fillStyle = 'rgba(50, 50, 80, 1)';
+				_canvasContext.fillRect(that.x, that.y, that.width, that.height);
+				
+				if(that.specialFigur != null)
+					_canvasContext.drawImage(that.specialFigur.img, this.x + this.width - that.specialFigur.x, HEIGHT - that.specialFigur.height, that.specialFigur.width, that.specialFigur.height);
 			
-		    this.color = blockColors[rnd];      
-		    this.width = _w ? _w : blockWidths[rnd];		    
-		    this.height = _h ? _h : blockHeights[rnd];
+				//_canvasContext.drawImage(this.img, this.x - 100 , HEIGHT - 44, 36, 44);
+			};
+
+			that.addSpecialFigure = function() {				
+				if(randomNumber(0,10) < 2)
+      				that.specialFigur = new SpecialFigur();
+      			else
+      				that.specialFigur = null;
+			}
+
+			return that;
+		};
+
+		// ------------------------------------------------------
+		var Skyscraper = function(x){
+			var that = this;
+
+			this.width = buildingWidths[randomNumber(0, buildingWidths.length -1)];
+			this.height = buildingHeights[randomNumber(0, buildingHeights.length -1)];
+			this.x = ~~ x;
+			this.y = HEIGHT - that.height;
+			that.alpha = alphaValues[randomNumber(0, alphaValues.length - 1)];
+
+			that.antenne = false;
+			if(randomNumber(1,10) > 7)
+				that.antenne = true;
+
+			that.draw = function() {
+				that.x -= 0.3;
+				if(clearAfteObject)
+					_canvasContext.clearRect(that.x-1, that.y, 1, that.height);
+
+
+				_canvasContext.fillStyle = 'rgba(0, 0, 0, '+that.alpha+')';
+				if(that.antenne == true)
+					_canvasContext.fillRect(that.x + (that.width / 2), that.y - 60, 5, 60);
+				
+				_canvasContext.fillRect(that.x, that.y, that.width, that.height);	
+			};
+			return that;
+		};
+
+		// ------------------------------------------------------
+		var SpecialFigur = function() {
+			var that = this;
+
+			var listOfImages = [ ["images/disco.png", 120, 45, 120],
+								 ["images/lamp.png", 50, 45, 40],
+								 ["images/tree.png", 36 , 44, -50]
+								];
+
+			this.img = new Image();		
+
+			var randomImage = randomNumber(0, listOfImages.length - 1);
+
+      		that.y = 0;
+      		this.img.src = listOfImages[randomImage][0];
+      		that.width = listOfImages[randomImage][1];
+      		that.height = listOfImages[randomImage][2];
+      		that.x = listOfImages[randomImage][3];
+		};
+
+		// ------------------------------------------------------
+		var Enemy = function(_blockX, _blockY, _blockW, _blockH) {
 			
-			this.x = _x;
-			this.y = canvas.height - this.height;
+			var that = this;
+			// src, width, height, xPos
+			var listOfEnemies = [ ["images/ninja.png", 18, 28, 25] ];
 
 			this.img = new Image();
-      		this.img.src = "block300_100.png";
 
-			this.speed = 2;
+			var randomImage = randomNumber(0, listOfEnemies.length - 1);
+      		
+      		this.img.src = listOfEnemies[randomImage][0];
+      		that.width = listOfEnemies[randomImage][1];
+      		that.height = listOfEnemies[randomImage][2];
+      		that.x = _blockX + randomNumber(0, _blockW - that.width);
+      		that.y = HEIGHT - randomNumber(that.height, _blockH);
 
-			this.draw = function(levelSpeed) {
+      		that.visible = false;
 
-				this.x -= this.speed + levelSpeed;
-				//this.ctx.fillStyle = this.color;
-				context.drawImage(this.img, this.x , this.y, this.width, this.height);
-				//this.ctx.fillRect (this.x, this.y, this.width, this.height);
+      		that.draw = function() {
+				that.x -= LEVEL_SPEED;
+				if(that.visible)
+					_canvasContext.drawImage(this.img, that.x, that.y, that.width, that.height);
+			}
+		};
 
-        		if(this.x + this.width < 0)
-        			this.speed = 0;
-        	}
+		// ------------------------------------------------------
+		var Cloud = function(_x, _y) {
+			var that = this;
 
+			this.x = ~~ _x;
+			this.y = ~~ _y;
+			that.radius = 14;
+
+			that.draw = function() {
+				if(clearAfteObject)
+					_canvasContext.clearRect(that.x + 68, that.y, 1, 30);
+
+				that.x -= 0.3;
+				_canvasContext.fillStyle = "#CCCCCC";
+			    _canvasContext.beginPath();
+			    _canvasContext.arc(this.x + 18, this.y + 27, that.radius, 0, Math.PI * 2, true);
+			    _canvasContext.arc(this.x + 35, this.y + 25, that.radius + 2, 0, Math.PI * 2, true);
+			    _canvasContext.arc(this.x + 52, this.y + 27, that.radius, 0, Math.PI * 2, true);
+			    _canvasContext.arc(this.x + 35, this.y + 15, that.radius, 0, Math.PI * 2, true);    
+			    _canvasContext.fill();
+			};
 		}
 
+		// ------------------------------------------------------
+		var Bonus = function(_x, _y, type){
+			var that = this;
 
-		function Level() {			
+			that.onCollide = function(index){
+				if(that.visible == true) {
+					score.addPoints(that.points);		
+					$("#counter").fadeOut().fadeIn();		
+				}
+				that.visible = false;
+			};
 
-			this.lastBlock = null;
-			this.blocks = new Array;
+			var bonusTypes = [ ["#008800", 100], ["#880000" , 150], ["#ffff00" , 200] ];
 
-			this.hero = new Player(context, canvas);
-			
-			this.speed = 0.00001;
-			const BLOCK_GAP = 160;
-			const MAX_SPEED = 12;
-			const ACCELERATION = 0.0001;
+			this.width = 5;
+			this.height = 5;
+			this.x = ~~ _x;
+			this.y = ~~ _y;
 
-			// Generate first block:
-			this.blocks.push(new Block(canvas.width / 2, 300, 60));
+			var randomType = randomNumber(0, bonusTypes.length - 1);
 
-			this.generateBlock = function() {	
+			that.color = bonusTypes[randomType][0];
+			that.points = bonusTypes[randomType][1];
+
+			that.visible = false;
+			if(randomNumber(1,10) > 9)
+				that.visible = true;
+
+			that.draw = function() {
+				that.x -= LEVEL_SPEED;
 				
-				if(this.blocks.length < 15) {
-					var nextX = canvas.width;
-					if(this.blocks.length > 0) {
-						nextX = this.blocks[this.blocks.length - 1].x + this.blocks[this.blocks.length - 1].width + BLOCK_GAP;
-					}
-					this.blocks.push(new Block(nextX));					
+				if(that.visible == true) {
+					_canvasContext.fillStyle = that.color;//'rgba(80, 150, 80, 1)';
+					_canvasContext.fillRect(that.x, that.y, that.width, that.height);				
 				}
+				/*_canvasContext.drawImage(this.img, this.x , this.y, this.width, this.height);*/
+			};
+
+			return that;
+		};
+
+		// ------------------------------------------------------
+		var Score = function() {
+			var that = this;
+			that.score = 0;
+
+			that.addPoints = function (points) {
+				that.score += points;
+				counter.value = that.score;				
 			}
 
-			this.draw = function() {
-
-        		
-        		this.hero.draw();
-				for(var i = 0; i < this.blocks.length; i++) {
-
-					var blockXRange = this.blocks[i].x + this.blocks[i].width;	     	
-
-			     	// Player hits ground
-			        if(this.hero.y + this.hero.height == canvas.height)
-			        	this.reset();
-
-					// Draw Block
-			     	if(blockXRange > 0) {
-			     		
-			     		if(this.speed < MAX_SPEED)
-			     			this.speed += ACCELERATION;
-						
-						this.hero.levelSpeed = this.speed;
-
-						// TODO: Only Draw blocks which are visible
-						this.blocks[i].draw(this.speed);
-
-					     		
-			     		// Player between Block
-						if( this.playerBetweenBlock(this.hero.x, this.hero.width, this.blocks[i].x, this.blocks[i].width) ) {
-		
-                this.hero.fall = false;
-                this.hero.blockGround = canvas.height - this.blocks[i].height; 
-			     		}			     	
-			     		// Player in front of block
-			     		/*if(this.playerToWall(this.blocks[i].x, this.blocks[i].y) )	{
-			     			this.hero.x = this.block[i].x - this.hero.width;
-			     			//this.hero.blockGround = canvas.height;
-			     		}*/
-			     		var nextBlock = this.nextBlock();
-			     		if(nextBlock != null) {
-			     			if(this.playerToWall(nextBlock.x, nextBlock.y)) {
-			     				this.hero.x = nextBlock.x - this.hero.width;
-			     				nextBlock.img.src = "blockNext.png";
-			     				console.log("NEXT:" + nextBlock.x);
-			     			}
-			     		}
-
-
-						// Player on ground
-		     			if(this.hero.y + this.hero.height >= canvas.height - 5) {
-		     				this.hero.y = -100;			     				
-		     				this.reset();
-						}
-
-	
-			     		// Player in Gap
-			     		// TODO: GET NEXT BLOCK
-			     		/*
-			     		if( (this.hero.x + this.hero.width) < this.blocks[i].x && this.hero.x > blockXRange ) {
-			     			this.hero.blockGround = canvas.height;
-
-			     			// Player
-			     			if((this.hero.y + this.hero.height <= this.blocks[i].y) && (this.hero.x + this.hero.width) >= this.blocks[i].x) {
-			     			this.hero.y = canvas.height - this.hero.height;
-			     			this.reset();
-			     		} 
-			     		}*/
-					} else {
-						// Delete if not visible anymore
-						this.blocks.splice(i, 1);
-					}
-					
-			     }			    			
-			}      
-
-			this.playerBetweenBlock = function(heroX, heroW, blockX, blockW) {
-				if((heroX >= blockX) && (heroX + heroW <= blockX + blockW))
-					return true;				
-				else
-					return false;			
+			that.getScore = function() {
+				return that.score;
 			}
+			
+			that.reset = function() {
 
-			this.playerToWall = function(blockX, blockY) {
-				if(this.hero.x + this.hero.width >= blockX && this.hero.y >= blockY)
-					return true;
-				else
-					return false;
+				var newScore = that.score + '<br />';
+				$("#scoreList").append(newScore);
+
+				that.score = 0;	
+				counter.value = 0;			
 			}
+		};
 
-			this.nextBlock = function() {
-				var nextBlocks = new Array();
-
-				for(var i = 0; i < this.blocks.length; i++) {
-					// GET ALL BLOCKS WHICH ARE COMING
-					if( (this.hero.x + this.hero.width) < this.blocks[i].x) {						
-						nextBlocks.push(this.blocks[i]);
-
-					}
-				}
-
-				var min = canvas.width; 
-				//console.log(nextBlocks.length);
-				if(nextBlocks.length > 0) {
-					min = nextBlocks[0].x;
-					var nextBlock = null;
-
-					// Get smallest x
-					for(var i = 0; i < nextBlocks.length; i++) {
-						if(nextBlocks[i].x < min) {
-							min = nextBlocks[i].x;
-							nextBlock = nextBlocks[i];
-						}
-					}
-
-					return nextBlock;
-				}
-			}
-
-			this.reset = function() {
-				counter = document.getElementById("counter");
-				counter.value = 0;
-				this.speed = 0.00001;		
-			}
-
-		}
-		
   		// --------------------------------------------------
+  		// *** INIT THE GAME *** 
   		function init() {
+  			
   			canvas = document.getElementById("canvas");
+  			buffer = document.getElementById("buffer-canvas");
+
+  			buffer.width = canvas.width;
+  			buffer.height = canvas.height;
+  			
   			context = canvas.getContext("2d");
+				_canvasContext = buffer.getContext("2d");
+
+  			HEIGHT = canvas.height - 2;
+  			WIDTH = canvas.width;		
+
+  			hero = new Player();
+  			hero.setPosition(~~((WIDTH - hero.width) / 2), ~~((HEIGHT - hero.height) / 2));
+
+  			level = new Level();
+  			level.generateBlocks(5);
+  			level.generateBuildings(6);
+  			level.generateClouds(5);
+
+				showGimmick();
+
+  			score = new Score();
+
+  			bg_cloud = new Image();
+  			bg_cloud.src = "images/clouds.png";
+
+  			moon = new Image();
+  			moon.src = "images/moon2.png";
+
+  			flash = new Image();
+	  		flash.src = "images/flash.png";
 
   			counter = document.getElementById("counter");
   			counter.value = 0;
-
-  			context.font = "12pt Arial";
-
-  			HEIGHT = canvas.height;
-  			WIDTH = canvas.width;		
-
-  			bg_cloud = new Image();
-  			bg_cloud.src = "clouds.png";
-
-  			skyscraper = new Image();
-  			skyscraper.src = "skyscraper.png"
-
-  			setInterval(draw, 15);
-  			setInterval(generate, 500);
-  		}
-
-
-  		// --------------------------------------------------
-  		function generate() {
-  			level.generateBlock(); 
-
-  			// SCORE
-  			if(level.hero.y > 0)
-  				counter.value = parseInt(counter.value) + 1; 			
-  		}
-
-  		var cloudMoveX = 0;
-  		var skyScraperMoveX = 400;
-  		function draw() {
-
-  			context.clearRect(0, 0, WIDTH, HEIGHT); 	
   			
-  			// Background
-  			var gradient1 = context.createLinearGradient(0, 0, 0, 300);
-  			gradient1.addColorStop(0,   '#c3d8ee');
-			gradient1.addColorStop(1,   '#fff');
-			context.fillStyle = gradient1;
-			context.fillRect(0, 0, 600, 300);
+  			LEVEL_SPEED = START_SPEED;
+			  			
+				// Background
+  			gradient1 = _canvasContext.createLinearGradient(0, 0, 0, HEIGHT);
+  			gradient1.addColorStop(0,   '#000');
+				gradient1.addColorStop(1,   '#222');
 
-  			// Clouds
-  			cloudMoveX -= .1;
-  			if(cloudMoveX <= -900.0) {
-  				cloudMoveX = canvas.width;  				
-  			}  			
-  			context.drawImage(bg_cloud, cloudMoveX , 0);
+				var snd = new Audio("hersey.mp3");
+				snd.play();
 
-  			// Skyscraper
-  			skyScraperMoveX -= .9;
-  			if(skyScraperMoveX <= -1200.0) {
-  				skyScraperMoveX = canvas.width;
-  			}
-  			context.drawImage(skyscraper, skyScraperMoveX , 0);
-  					
-  			// Draw Level
-  			level.draw();  			
-
-  			//context.fillStyle = "#0000FF";
-  			//context.fillText(counter.value, 5, 15);
+				setInterval(draw, 1000 / 50);
+				setInterval(setCounter, 100);
+				setInterval(function(){
+		  			$("#fps").val(fps.toFixed(1));
+				}, 1000); 
   		}
 
   		// --------------------------------------------------
-  		function onKeyDown(evt) {	
+  		// *** COLLISION DETECTION COMES HERE *** //
+  		var isColliding = function(e) {
+  			if (//(hero.isFalling) && 
+					(hero.x < e.x + e.width) && 
+					(hero.x + hero.width > e.x) && 
+					(hero.y + hero.height > e.y ) &&					
+					(hero.y + hero.height < e.y + e.height) //&&
+					//(hero.y + hero.height >= e.y)
+					) {
+				return true;
+			} else {
+				return false;
+			}
+  		};
+
+  		var checkCollision = function(){
+				platforms.forEach(function(e, ind){
+					if (isColliding(e)) {
+						e.onCollide(ind);
+					} else {
+						e.notOnCollide();
+					}
+				})
+
+				bonis.forEach(function(e, ind){
+					if (			
+						(e.x > hero.x) &&
+						(e.x + e.width < hero.x + hero.width) &&		
+						(hero.y < e.y) && 
+						(hero.y + hero.height > e.y )					
+						) {
+							e.onCollide();
+					}
+				})
+
+				enemies.forEach(function(e, ind){
+					if(e.visible == true) {
+						if (			
+							(e.x > hero.x) &&
+							(e.x + e.width < hero.x + hero.width) &&		
+							(e.y > hero.y) && 
+							(e.y < hero.y + hero.height)		
+							) {
+								level.reset();
+						}
+					}
+				})
+/*
+			if(hero.y + hero.height >= HEIGHT) {
+				//level.reset();
+			}
+*/
+		}
+
+		// --------------------------------------------------
+  		// Clear canvas
+  		function clear() {
+  			//_canvasContext.clearRect(0, 10, WIDTH, HEIGHT - 2);
+	  	}
+
+	  	function setCounter() {
+	  		score.addPoints(1);	  	  				
+	  	}
+
+	  	var cloudMoveX = 0;
+	  	var skyscraperMoveX = 0;
+
+	  	var fps = 0, now, lastUpdate = (new Date)*1 - 1;
+		var fpsFilter = 10;
+	  	
+	  	// --------------------------------------------------
+	  	// *** Draw Canvas ***
+  		function draw() {
+  			if(!clearAfteObject)
+				clear();
+
+			// Draw Background-Gradient
+			_canvasContext.fillStyle = gradient1;
+			_canvasContext.fillRect(0, 0, WIDTH, HEIGHT);
+
+			// Moon
+			_canvasContext.drawImage(moon, 100, 20);
+
+			// Gimmick
+			if(showFlash == true)
+				_canvasContext.drawImage(flash, 120, 0);
+
+			// Clouds			
+  		clouds.forEach(function(cloud) {
+				cloud.draw();
+			});	
+
+  			// Skyscrapers
+			skyscrapers.forEach(function(skyscraper) {
+				skyscraper.draw();
+			});	
+
+			checkCollision();
+  			
+  			// Platforms
+			platforms.forEach(function(platform) {
+				platform.draw();
+			});	
+			
+			// Bonus
+			bonis.forEach(function(bonus) {
+				bonus.draw();
+			});		
+
+			// Enemies
+			enemies.forEach(function(enemy) {
+				enemy.draw();
+			});	
+			
+			// Draw Player
+			if (hero.isJumping) hero.checkJump();
+			if (hero.isFalling) hero.checkFall();
+			hero.draw();
+
+			_canvasContext.fillStyle = "#CCC";
+			_canvasContext.fillRect(0, HEIGHT, WIDTH, 2);
+			
+  			// Update Level
+  			level.update();
+
+  			context.drawImage(buffer, 0, 0);
+
+  			// FPS CHECK
+  			var thisFrameFPS = 1000 / ((now=new Date) - lastUpdate);
+  			fps += (thisFrameFPS - fps) / fpsFilter;
+  			lastUpdate = now;
+  		}
+  		
+
+  		// --------------------------------------------------
+  		function onKeyDown(evt) {
+  			console.log(evt.keyCode);	
   			switch (evt.keyCode) {
-  				case 39:    					
-    					level.hero.right = true;
-    					break;
-  				case 37:
-  						level.hero.left = true;
-  						break;
+  				// Arrow Up -> Jump
   				case 38:
-  						level.hero.grounded = false;
+  						hero.jump();
   						break;
+  				case 88:
+  					startSlowMotion();
+  					break;
   			}
 		}
 		
 		function onKeyUp(evt) {
-  			switch (evt.keyCode) {
-  				case 39:
-    					level.hero.right = false;
-    					break;
-  				case 37:
-  						level.hero.left = false;
-  						break;  				
+  			switch (evt.keyCode) {				
   			}
 		}
-
+		
 		// --------------------------------------------------
-  		$(document).ready(function() {
+  		$(document).ready(function() {  			
   			init();
-  			level = new Level();
   		});
 
   		$(document).keydown(onKeyDown);
 		$(document).keyup(onKeyUp);
+		$(document).mousedown(function() { 
+			hero.jump();
+		});
 
 </script>
 
-<div style="width:600px;margin-left:20%;">Score: <input size="4" type="text" id="counter" value="1" class="counter" readonly="readonly" /></div>
-<canvas id="canvas" width="600" height="300">Your browser doesnt know html5 canvas	</canvas>
+<h1>runnersHigh Html5 (0.7)</h1>
+<div style="width:800px;margin:auto;">
+	<input size="4" type="text" id="fps" /> fps
+</div>
 
+<canvas id="canvas" width="800" height="480">Your browser doesnt know html5 canvas</canvas>
+<canvas id="buffer-canvas" width="800" height="480" style="display:none;">Your browser doesnt know html5 canvas</canvas>
+
+<div style="width:800px;margin:auto;text-align:center;">
+	<input size="4" type="text" id="counter" value="1" class="counter" readonly="readonly" />	
+</div>
+
+
+<!-- <audio src="hersey.mp3" preload="auto" autobuffer autoplay></audio> -->
+
+<div id="scoreList">
+</div>
+
+<p>
+This is a simple Jump&amp;Run game which I made just for fun and learning experiences.
+It is absolutely not finished yet!
+<br />
+The best performance was achieved in Firefox > 4
+</p>
+<p><strong>Instructions:</strong> Use your keyboard arrow up-key or left mouse button to jump!</p>
+<p>Made by <a href="http://www.weberdevelopment.de" target="_blank">weberdevelopment.de</a> in June 2011</p>
+<!--
+Todo:
+<ul>
+	<li>Fix:<ul>
+				<li>PlayerJump</li>
+			</ul>
+	</li>
+	<li>Implement obstacles</li>
+	<li>Bonis:<ul>
+					<li>Implement as child</li>
+					<li>Can move</li>
+					<li>Have special things: more points, level_speed--, ...</li>
+			</ul>
+	</li>
+	<li>Collision-Detection:</li>
+	<li>Balancing:<ul>
+						<li>Bonis</li>
+						<li>Jump-Height, Player has max-jump </li>
+						<li>Randomness of obstacles</li>
+					</ul>
+	</li>
+	<li>Performace:<ul>
+					</ul>
+	</li>
+	<li>Gimmicks:<ul>
+						<li>Speech bubble for runner</li>
+						<li>Clouds with rain effect</li>
+						<li>Flash</li>
+						<li>Save score!</li>
+					</ul>
+	</li>
+	<li>Create nicer graphics</li>
+</ul>
+-->
 </body>
 </html>
