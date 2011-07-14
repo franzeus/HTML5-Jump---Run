@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+	<title>runnersHigh Html5 Version</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta http-equiv="language" content="de" />
+	<meta name="author" content="weberdevelopment.de" />
+	<meta name="robots" content="index, follow" />
+	<meta name="keywords" content="html5,2d,jump,run,game" />
+  <meta name="description" content="Simple jump and run game in HTML5 canvas" />
+
+ 	<meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+ 	<link rel="shortcut icon" href="img/favicon.ico" />
+ 		
+	<script src="http://www.google.com/jsapi?key=ABQIAAAA-aA-cQ-Dt_eOXMt2cABhzRQvRPGmAZu-tlfdhJELAgtO16tnWxRtu6M5pPKTlkg0fzoFpSutd24Z6A" type="text/javascript"></script>
+	<!--
+	Default: load JQuery from google library 
+    http://code.google.com/intl/de-DE/apis/ajaxlibs/
+    -->
+    <script type="text/javascript">
+  		google.load("jquery", "1");
+	</script>
+
+	<link href='http://fonts.googleapis.com/css?family=Limelight&v1' rel='stylesheet' type='text/css'>
+	<style>
+		h1 { font-family: 'Limelight', arial, serif; font-size:3em; text-align:center; }
+		body { color:#FFFFFF; background:#666666; font-family: 'Limelight', arial;}
+		canvas { background:#FFFFFF; margin-left:18%; }
+		.counter { background:none; color:#333333; font-size:1.6em; border:0; font-family: 'Limelight', arial, serif;}
+		#fps { background:#FFFFFF; color:#333333; border:0; color:#008800; }
+		.button { margin-right:1em; cursor:pointer;}
+		#scoreList { padding-top:0.5em;}
+	</style>
+
+</head>
+<body id="body">
+
+
+<h1>runnersHigh Html5 (0.7)</h1>
+<div style="width:800px;margin:auto;">
+	<div style="float:left;">
+		<input size="4" type="text" id="fps" /> fps
+		<br />Last score: <span id="lastScore">0</span>
+	</div>
+
+	<div style="float:right;">
+		<div style="text-align:center">
+			<img src="info.png" id="infoButton" alt="Info" class="button" title="Info"/>
+			<a href="https://github.com/webarbeit/HTML5-Jump---Run" target="_blank"><img src="code.png" id="codeButton" alt="Code" class="button" title="Code @ Github"/></a>
+		</div>
+	</div>
+</div>
+
+<canvas id="canvas" width="800" height="480">Your browser doesnt know html5 canvas</canvas>
+<canvas id="buffer-canvas" width="800" height="480" style="display:none;">Your browser doesnt know html5 canvas</canvas>
+
+<div style="width:800px;margin:auto;text-align:center;">
+	<input size="4" type="text" id="counter" value="1" class="counter" readonly="readonly" />	
+</div>
+
+
+<!-- <audio src="hersey.mp3" preload="auto" autobuffer autoplay></audio> -->
+
+
+
+<div id="info">
+	<p>
+	DESCRIPTION:<br />
+	This is a simple Jump&amp;Run game which I made just for fun and learning experiences.
+	It is absolutely not finished yet!
+	<br />
+	The best performance was achieved in Firefox > 4
+	</p>
+	<p><strong>INSTRUCTIONS:</strong><br /> Use your keyboard arrow up-key, space bar or left mouse button to jump!</p>
+	<p>Made by <a href="http://www.weberdevelopment.de" target="_blank">weberdevelopment.de</a> in June 2011</p>
+</div>
+<!--
+Todo:
+<ul>
+	<li>Fix:<ul>
+				<li>PlayerJump</li>
+			</ul>
+	</li>
+	<li>Implement obstacles</li>
+	<li>Bonis:<ul>
+					<li>Implement as child</li>
+					<li>Can move</li>
+					<li>Have special things: more points, level_speed--, ...</li>
+			</ul>
+	</li>
+	<li>Collision-Detection:</li>
+	<li>Balancing:<ul>
+						<li>Bonis</li>
+						<li>Jump-Height, Player has max-jump </li>
+						<li>Randomness of obstacles</li>
+					</ul>
+	</li>
+	<li>Performace:<ul>
+					</ul>
+	</li>
+	<li>Gimmicks:<ul>
+						<li>Speech bubble for runner</li>
+						<li>Clouds with rain effect</li>
+						<li>Flash</li>
+						<li>Save score!</li>
+					</ul>
+	</li>
+	<li>Create nicer graphics</li>
+</ul>
+-->
+
+
+<script src="js/functions.js" type="text/javascript"></script>
+<script src="js/level.js" type="text/javascript"></script>
+<script src="js/player.js" type="text/javascript"></script>
+<script src="js/platform.js" type="text/javascript"></script>
+<script src="js/skyscraper.js" type="text/javascript"></script>
+<script src="js/specialfigur.js" type="text/javascript"></script>
+<script src="js/enemy.js" type="text/javascript"></script>
+<script src="js/cloud.js" type="text/javascript"></script>
+<script src="js/bonus.js" type="text/javascript"></script>
+<script src="js/score.js" type="text/javascript"></script>
+<script src="js/init.js" type="text/javascript"></script>
+<script src="js/collision.js" type="text/javascript"></script>
+<script src="js/draw.js" type="text/javascript"></script>
+<script src="js/events.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+// --------------------------------------------------
+$(document).ready(function() {  			
+	init();
+	$("#info").hide();
+
+
+	$(".button").mouseover(function() { 
+		$(this).fadeTo("slow", 0.6);				
+	}).mouseout(function(){
+		$(this).fadeTo("slow", 1);
+	});
+
+	$("#infoButton").click(function() {
+		$("#info").slideToggle('slow'); //.show();
+	});
+});
+
+$(document).keydown(onKeyDown);
+$(document).keyup(onKeyUp);
+$(document).mousedown(function() { 
+	hero.jump();
+});
+</script>
+
+</body>
+</html>
