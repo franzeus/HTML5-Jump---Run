@@ -15,19 +15,19 @@ function draw() {
 	// Moon
 	_canvasContext.drawImage(moon, 100, 20);
 
-	// Gimmick
-	if(showFlash == true)
-		_canvasContext.drawImage(flash, 120, 0);
-
-	// Clouds			
-	clouds.forEach(function(cloud) {
-		cloud.draw();
-	});
-
 	// Skyscrapers
 	skyscrapers.forEach(function(skyscraper) {
 		skyscraper.draw();
 	});	
+
+	// Gimmick
+	if(showFlash == true)
+		_canvasContext.drawImage(flash, 120, 0);
+
+	// Clouds
+	clouds.forEach(function(cloud) {
+		cloud.draw();
+	});
 
 	checkCollision();
 		

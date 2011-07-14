@@ -3,6 +3,8 @@
 	www.weberdevelopment.de
 
 	Several useful nice awesome functions
+
+	*** has to be the FIRST FILE to be included ***
 */
 var canvas;
 var context;
@@ -49,14 +51,13 @@ var flash;
 var showFlash = false;
 var aktiv;
 
-var cloudMoveX = 0;
-var skyscraperMoveX = 0;
+var cloudMoveX = 0, skyscraperMoveX = 0;
 
 var fps = 0, now, lastUpdate = (new Date)*1 - 1;
 var fpsFilter = 10;
 
 // ------------------------------------------------------
-window.requestAnimFrame = (function() { 
+window.requestAnimFrame = (function() { // dont use it yet
 
 	return window.requestAnimationFrame ||
 			window.webkitRequestAnimationFrame ||
@@ -69,6 +70,7 @@ window.requestAnimFrame = (function() {
 })();
 
 // ------------------------------------------------------
+// Return a random number between min and max
 function randomNumber( min, max ) {
 	if( min > max )
 		return( -1 );
@@ -78,6 +80,6 @@ function randomNumber( min, max ) {
 		return( min + parseInt( Math.random() * ( max-min+1 ) ) );
 }
 
-function clear() {
+function clear() {	// actually I dont need it!?
 	//_canvasContext.clearRect(0, 10, WIDTH, HEIGHT - 2);
 };

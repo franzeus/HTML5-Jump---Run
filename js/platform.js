@@ -44,7 +44,7 @@ var Platform = function(x, _w, _h) {
 	};
 
 	that.addSpecialFigure = function() {				
-		if(randomNumber(0,10) < 2)
+		if(randomNumber(0,10) < 4)
 			that.specialFigur = new SpecialFigur();
 		else
 			that.specialFigur = null;
