@@ -16,7 +16,7 @@ function init() {
 	context = canvas.getContext("2d");
 	_canvasContext = buffer.getContext("2d");
 
-	HEIGHT = canvas.height - 2;
+	HEIGHT = canvas.height; //- 2;
 	WIDTH = canvas.width;		
 
 	hero = new Player();

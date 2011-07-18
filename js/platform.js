@@ -22,6 +22,7 @@ var Platform = function(x, _w, _h) {
 	this.height = _h;
 	this.x = ~~ x;
 	this.y = HEIGHT - that.height;
+	this.angle = 0;
 
 	that.specialFigur = null;
 
@@ -30,12 +31,24 @@ var Platform = function(x, _w, _h) {
 		
 	that.draw = function() {
 		that.x -= LEVEL_SPEED;
+
+		if(that.x <= 230) {
+     		that.y += 2;
+      		that.angle -= 0.005;
+    	}
 		
 		if(clearAfteObject)
 			_canvasContext.clearRect(that.x-1, that.y, 1, that.height);
 
+		
+		_canvasContext.save();
+	    _canvasContext.rotate(that.angle);
+	    
 		_canvasContext.fillStyle = 'rgba(50, 50, 80, 1)';
 		_canvasContext.fillRect(that.x, that.y, that.width, that.height);
+
+	    _canvasContext.restore();
+
 		
 		if(that.specialFigur != null)
 			_canvasContext.drawImage(that.specialFigur.img, this.x + this.width - that.specialFigur.x, HEIGHT - that.specialFigur.height, that.specialFigur.width, that.specialFigur.height);

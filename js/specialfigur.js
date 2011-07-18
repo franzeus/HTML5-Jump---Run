@@ -10,7 +10,7 @@ var SpecialFigur = function() {
 	var listOfImages = [ ["images/disco.png", 120, 45, 120],
 						 ["images/lamp.png", 50, 45, 40],
 						 ["images/tree.png", 36 , 44, -50],
-						 ["images/grid.png", 150 , 30, 0]
+						 ["images/grid.png", 150 , 30, 0],						 
 						];
 
 	this.img = new Image();		

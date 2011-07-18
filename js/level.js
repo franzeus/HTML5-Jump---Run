@@ -23,12 +23,13 @@ function Level() {
 
 	that.checkPlatformsPosition = function() {		
 		for(var i = 0; i < platforms.length; i++) {
-			if(platforms[i].x + platforms[i].width < 0) {						
+			if(platforms[i].x + platforms[i].width + 50 < 0) {						
 				platforms[i].x = that.getPreviousBlockXPosition(i);
 				
 				platforms[i].width = blockWidths[randomNumber(0, blockWidths.length -1)];
 				platforms[i].height = blockHeights[randomNumber(0, blockHeights.length - 1)];
 				platforms[i].y = HEIGHT - platforms[i].height;
+				platforms[i].angle = 0;
 				platforms[i].addSpecialFigure();
 
 				// New Bonus Position
@@ -178,7 +179,7 @@ var showGimmick = function() {
 	var rnd = randomNumber(0,100);
 	showFlash = false;
 	if(rnd < 10) {
-		showFlash = true;			
+		showFlash = true;
 	}
 	aktiv = setTimeout("showGimmick()", 1000);
 };

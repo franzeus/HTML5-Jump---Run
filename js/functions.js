@@ -39,6 +39,7 @@ var bonis = [];
 var skyscrapers = [];
 var clouds = [];
 var enemies = [];
+var gimmicks = [];
 
 var blockWidths = [ 100, 150, 200, 250];
 var blockHeights = [ 60, 90, 120, 150];

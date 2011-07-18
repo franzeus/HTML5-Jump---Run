@@ -52,7 +52,7 @@ function draw() {
 	hero.draw();
 
 	_canvasContext.fillStyle = "#CCC";
-	_canvasContext.fillRect(0, HEIGHT, WIDTH, 2);
+	_canvasContext.fillRect(0, HEIGHT - 2, WIDTH, 2);
 
 	// Update Level
 	level.update();
