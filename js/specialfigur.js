@@ -17,9 +17,10 @@ var SpecialFigur = function() {
 
 	var randomImage = randomNumber(0, listOfImages.length - 1);
 
-		that.y = 0;
-		this.img.src = listOfImages[randomImage][0];
-		that.width = listOfImages[randomImage][1];
-		that.height = listOfImages[randomImage][2];
-		that.x = listOfImages[randomImage][3];
+	that.y = 0;
+	this.img.src = listOfImages[randomImage][0];
+	that.width = listOfImages[randomImage][1];
+	that.height = listOfImages[randomImage][2];
+	that.x = listOfImages[randomImage][3];
+
 };

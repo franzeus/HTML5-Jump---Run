@@ -21,8 +21,11 @@ function draw() {
 	});	
 
 	// Gimmick
-	if(showFlash == true)
+	if(showFlash == true) {
+		_canvasContext.fillStyle = 'rgba(255, 255, 255, 0.6)';
+		_canvasContext.fillRect(0, 0, WIDTH, HEIGHT);		
 		_canvasContext.drawImage(flash, 120, 0);
+	}
 
 	// Clouds
 	clouds.forEach(function(cloud) {
