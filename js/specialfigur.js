@@ -7,10 +7,10 @@
 var SpecialFigur = function() {
 	var that = this;
 
-	var listOfImages = [ ["images/disco.png", 120, 45, 120],
+	//["images/disco.png", 120, 45, 120]["images/grid.png", 150 , 30, 0],
+	var listOfImages = [ 
 						 ["images/lamp.png", 50, 45, 40],
-						 ["images/tree.png", 36 , 44, -50],
-						 ["images/grid.png", 150 , 30, 0],						 
+						 ["images/tree.png", 36 , 44, -50]						 						 
 						];
 
 	this.img = new Image();		

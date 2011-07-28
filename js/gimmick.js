@@ -7,8 +7,7 @@
 var Gimmick = function() {
 	var that = this;
 
-	var listOfImages = [ ["images/jetLeft.png", 111, 30, 480, 40];
-						];
+	var listOfImages = [ ["images/jetLeft.png", 111, 30, 480, 40] ];
 	var randomImage = randomNumber(0, listOfImages.length - 1);
 	
 	this.img = new Image();

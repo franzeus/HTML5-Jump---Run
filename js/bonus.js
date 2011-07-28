@@ -22,6 +22,11 @@ var Bonus = function(_x, _y, type){
 	this.x = ~~ _x;
 	this.y = ~~ _y;
 
+	// Later for rotation
+	this.startY = ~~ _y;
+	this.startX = ~~ _x;
+	this.degree = 180;
+
 	var randomType = randomNumber(0, bonusTypes.length - 1);
 
 	that.color = bonusTypes[randomType][0];
@@ -32,8 +37,8 @@ var Bonus = function(_x, _y, type){
 		that.visible = true;
 
 	that.draw = function() {
-		that.x -= LEVEL_SPEED;
-		
+		that.x -= LEVEL_SPEED;		
+
 		if(that.visible == true) {
 			_canvasContext.fillStyle = that.color;//'rgba(80, 150, 80, 1)';
 			_canvasContext.fillRect(that.x, that.y, that.width, that.height);				

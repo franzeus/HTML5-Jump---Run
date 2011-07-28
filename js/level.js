@@ -161,16 +161,18 @@ function Level() {
 	};
 
 	that.reset = function() {
-		LEVEL_SPEED = START_SPEED;
-		score.reset();
-		platforms = [];
-		enemies = [];
-		clouds = [];
-		skyscrapers = [];
+		if(godmode == false) {
+			LEVEL_SPEED = START_SPEED;
+			score.reset();
+			platforms = [];
+			enemies = [];
+			clouds = [];
+			skyscrapers = [];
 
-		that.generateBuildings(6);
-		that.generateClouds(5);
-		that.generateBlocks(5);
+			that.generateBuildings(6);
+			that.generateClouds(5);
+			that.generateBlocks(5);
+		}
 	};
 };
 

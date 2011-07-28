@@ -42,11 +42,22 @@ var checkCollision = function(){
 
 	enemies.forEach(function(e, ind){
 		if(e.visible == true) {
+			// Enemy in Hero
 			if (			
 				(e.x > hero.x) &&
-				(e.x + e.width < hero.x + hero.width) &&		
+				(e.x < hero.x + hero.width) &&		
 				(e.y > hero.y) && 
 				(e.y < hero.y + hero.height)		
+				) {
+					level.reset();
+			}
+
+			// Hero in Enemy
+			if (			
+				(hero.x > e.x) &&
+				(hero.x < e.x + e.width) &&		
+				(hero.y > e.y) && 
+				(hero.y < e.y + e.height)		
 				) {
 					level.reset();
 			}

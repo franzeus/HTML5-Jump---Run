@@ -14,7 +14,7 @@ var Platform = function(x, _w, _h) {
 
 	that.notOnCollide = function() {
 		if ((hero.x > that.x + that.width) || (hero.x + hero.width < that.x)) {
-			hero.isFalling = true;					
+			hero.isFalling = true;				
 		}								
 	};
 
@@ -46,7 +46,7 @@ var Platform = function(x, _w, _h) {
 
 		_canvasContext.fillStyle = 'rgba(50, 50, 80, 1)';
 		_canvasContext.fillRect(that.x, that.y, that.width, that.height);
-		
+				
 		_canvasContext.restore();
 
 		if(that.specialFigur != null)

@@ -2,7 +2,7 @@
 	RUNNERSHIGH HTML5 Version
 	www.weberdevelopment.de
 
-	Several useful nice awesome functions
+	Inits the game
 */
 // *** INIT THE GAME *** 
 function init() {

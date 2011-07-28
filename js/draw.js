@@ -32,7 +32,7 @@ function draw() {
 		cloud.draw();
 	});
 
-	checkCollision();
+	checkCollision(); // Should be in an update function!
 		
 	// Platforms
 	platforms.forEach(function(platform) {

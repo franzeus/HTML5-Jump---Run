@@ -18,7 +18,7 @@ var Skyscraper = function(x){
 				that.antenne = true;
 
 			that.draw = function() {
-				that.x -= 0.3;
+				that.x -=  (LEVEL_SPEED * 0.1);
 				if(clearAfteObject)
 					_canvasContext.clearRect(that.x-1, that.y, 1, that.height);
 
@@ -27,7 +27,7 @@ var Skyscraper = function(x){
 				if(that.antenne == true)
 					_canvasContext.fillRect(that.x + (that.width / 2), that.y - 60, 5, 60);
 				
-				_canvasContext.fillRect(that.x, that.y, that.width, that.height);	
+				_canvasContext.fillRect(that.x, that.y, that.width, that.height);
 			};
 			return that;
 		};

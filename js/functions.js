@@ -57,6 +57,8 @@ var cloudMoveX = 0, skyscraperMoveX = 0;
 var fps = 0, now, lastUpdate = (new Date)*1 - 1;
 var fpsFilter = 10;
 
+var godmode = true;
+
 // ------------------------------------------------------
 window.requestAnimFrame = (function() { // dont use it yet
 
